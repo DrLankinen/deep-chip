@@ -7,3 +7,5 @@ This week I learned how Monte Carlo tree search works in high level, Texas holde
 The fear is that I try to achieve too much and don't get this to work. I have prior knowledge about reinforcement learning and it feels like I understand this enough to implement. I didn't want to take a too simple game and GO didn't felt interesting because I don't know how to play it.
 
 The next week I will start by studying more about the environment I will be using. Hopefully, I also have time to start writing the algorithm to understand how it works. Because the game is really big and contain randomness I might need to test the algorithm using something simpler like tic-tac-toe.
+
+spent 5 hours this week
