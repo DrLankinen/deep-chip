@@ -1,5 +1,6 @@
 import math
 import random
+import state_handler
 
 class MCTS:
     def __init__(self,epsilon):
@@ -9,7 +10,16 @@ class MCTS:
         self.N = dict() # num of visits for each state
         self.children = dict() # children of each state
 
-    def make_action(self, state, valid_actions):
+    def play_turn(self, state, players, valid_actions, num_of_rollouts=100):
+        # Do n rollouts before making the action
+        # more rollouts means better actions but
+        # it takes more time
+        for _ in range(num_of_rollouts):
+            self._rollout(state, players)
+        # Pick action
+        return self._pick_action(state, valid_actions)
+
+    def _pick_action(self, state, valid_actions):
         # If first time in this state choose random child
         if state not in self.children:
             return choose_random_action(valid_actions)
@@ -22,71 +32,68 @@ class MCTS:
         
         return max(self.children[state], key=value)
 
-    def rollout(self, state):
+    def _rollout(self, state, players):
         # Calculate one layer
         # A list of states that leads to unexplored or terminal state
         path = self._select(state)
         leaf = path[-1]
         # Find all children states
-        self._expand(leaf)
-        reward = self._simulate(leaf)
+        self._expand(leaf,players)
+        reward = self._simulate(leaf,players)
         self._backpropagate(path, reward)
 
     # Takes random path from gives state to unexplored or terminal state
     def _select(self, state):
         path = []
-        # Continue until finds unexplored or terminal node
+        # Continue until finds unexplored or terminal state
         while True:
             path.append(state)
             if state not in self.children or not self.children[state]:
                 # Unexplored or terminal
                 return path
-            # Checks what nodes we haven't explored yet
+            # Checks what states we haven't explored yet
             unexplored = self.children[state] - self.children.keys()
-            # If there is unexplored nodes
+            # If there is unexplored states
             if unexplored:
                 # Pop the first
                 n = unexplored.pop()
                 path.append(n)
                 return path
-            # Select children node using uct
-            state = self._uct_select(state)
+            # Select children state using uct
+            state = self._ucb1_select(state)
     
-    def _expand(self, state):
-        # Find all children nodes
+    def _expand(self, state, players):
+        # Find all children states
         if state in self.children: return
-        self.children[state] = state.find_children()
+        self.children[state] = state_handler.find_children(state,players)
     
-    def _simulate(self, state):
-        invert_reward = True
+    def _simulate(self, state, players):
+        # Go to random child state until terminal
         while True:
-            if state.is_terminal():
-                reward = state.reward()
-                return 1 - reward if invert_reward else reward
-            state = state.find_random_child()
-            invert_reward = not invert_reward
+            if state_handler.is_terminal(state):
+                reward = state_handler.final_reward(state)
+                return reward
+            state = state_handler.find_random_child(state,players)
     
     def _backpropagate(self, path, reward):
-        # Send reward to above
+        # Send reward to above state
         for state in reversed(path):
             self.N[state] += 1
             self.Q[state] += reward
-            reward = 1 - reward
     
-    def _uct_select(self, state):
+    def _ucb1_select(self, state):
         # http://www.jmlr.org/papers/volume3/auer02a/auer02a.pdf
         # This helps to balance between exploration and exploitation
-        def uct(n):
+        def ucb1(n):
             exploitation = self.Q[n]/self.N[n]
             exploration = self.epsilon*math.sqrt(math.log(self.N[state])/self.N[n]) 
             return exploitation + exploration
-        return max(self.children[state], key=uct)
+        return max(self.children[state], key=ucb1)
 
 
-def choose_random_action(valid_actions):
+def choose_random_action(valid_actions,seed=None):
+    if seed: random.seed(seed)
     valid_action = random.randint(0,len(valid_actions)-1)
     action, amount = valid_action['action'], valid_action['amount']
     if action == "raise": amount = random.randint(amount['min'],amount['max'])
     return action, amount
-    
-

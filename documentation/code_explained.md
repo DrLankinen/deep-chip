@@ -10,4 +10,5 @@ https://ieeexplore.ieee.org/abstract/document/6203567
 Layer between PyPokerEngine API and brain.py. This is needed because PyPokerEngine will give pretty raw data that we need to formated the right way for the algorithms.
 
 
-
+## game_state.py
+This contains code that checks state related things like what are the child states.
