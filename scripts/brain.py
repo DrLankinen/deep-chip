@@ -93,7 +93,7 @@ class MCTS:
 
 def choose_random_action(valid_actions,seed=None):
     if seed: random.seed(seed)
-    valid_action = random.randint(0,len(valid_actions)-1)
-    action, amount = valid_action['action'], valid_action['amount']
+    random_action = valid_actions[random.randint(0,len(valid_actions)-1)]
+    action, amount = random_action['action'], random_action['amount']
     if action == "raise": amount = random.randint(amount['min'],amount['max'])
     return action, amount

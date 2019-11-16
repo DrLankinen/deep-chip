@@ -2,7 +2,7 @@
 from pypokerengine.players import BasePokerPlayer
 import state_handler
 
-class MCTSPlayer(BasePokerPlayer):
+class AlgorithmPlayer(BasePokerPlayer):
     # https://github.com/ishikota/PyPokerEngine/blob/master/AI_CALLBACK_FORMAT.md
 
     def __init__(self, algorithm):
