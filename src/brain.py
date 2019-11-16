@@ -1,6 +1,6 @@
 import math
 import random
-import state_handler
+from src import state_handler
 
 class MCTS:
     def __init__(self,epsilon):

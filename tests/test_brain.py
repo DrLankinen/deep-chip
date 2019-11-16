@@ -1,4 +1,4 @@
-import brain
+from src import brain
 import unittest
 
 class Tests(unittest.TestCase):
