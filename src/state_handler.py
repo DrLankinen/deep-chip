@@ -2,13 +2,14 @@ from pypokerengine.api.emulator import Emulator
 from pypokerengine.engine.action_checker import ActionChecker
 from pypokerengine.engine.hand_evaluator import HandEvaluator
 from pypokerengine.engine.card import Card
+from pypokerengine.engine.round_manager import RoundManager
 import random
 
 def reformat_state(state,hole_card):
     # Changes state got from PyPokerEngine to
     # format this code is supporing
     # TODO: Try remove some information to make the state space smaller
-    state['hole_card'] = hole_cardgen_hand_rank_info
+    state['hole_card'] = hole_card
     # str because need to be used as a key
     # can be changed back to dictonary with eval()
     return str(state)
@@ -18,10 +19,10 @@ def find_children(state,players):
     state = eval(state)
     children = []
     own_possible_actions = find_possible_actions(state,players)
-    future_info = simulate_actions(state,own_possible_actions)
+    future_info = simulate_actions(state,own_possible_actions,players)
     for future_state, future_players in future_info:
         opponent_possible_actions = find_possible_actions(future_state,future_players)
-        simulated_next_states = simulate_actions(state,opponent_possible_actions)
+        simulated_next_states = simulate_actions(state,opponent_possible_actions,players)
         for next_state in simulated_next_states:
             if next_state not in children: children.append(next_state)
     return children
@@ -47,8 +48,10 @@ def is_terminal(state,reward=False):
     for action in reversed(actions):
         if action["action"] == "CALL": cc_counter += 1
         else: return
-        if cc_counter >= 2 and reward: return True, final_reward(state)
-        else cc_counter >= 2 and not reward: return True
+        if cc_counter >= 2 and reward: 
+            return True, final_reward(state)
+        elif cc_counter >= 2 and not reward: 
+            return True
 
     # Return reward if wanted
     if reward: return True, final_reward(state)
@@ -94,6 +97,7 @@ def final_reward(state):
     open_cards = own_cards + community_cards
     cards_still_in_deck = [x for x in all_cards if x not in open_cards]
     
+    # Give opponent all possible card combinations
     for first in range(cards_still_in_deck-1):
         for second in range(first+1,cards_still_in_deck):
             card_one = cards_still_in_deck[first]
@@ -110,12 +114,12 @@ def final_reward(state):
                 community_card_objects.append(Card(_decode_card(card)))
             
             # Check values
-            opponent_hand_value = HandEvaluator.get_hand_rank_info([opponent_card_one,opponent_card_two],community_card_objects)
-            own_hand_value = HandEvaluator.get_hand_rank_info([own_card_one,own_card_two],community_card_objects)
-            
-            # FIXME
-            # EXAMPLE OF get_hand... return:
-            # {'hand': {'strength': 'STRAIGHTFLASH', 'high': 2, 'low': 0}, 'hole': {'high': 3, 'low': 2}}
+            opponent_hand_value = HandEvaluator.evaluate_hand([opponent_card_one,opponent_card_two],community_card_objects)
+            own_hand_value = HandEvaluator.evaluate_hand([own_card_one,own_card_two],community_card_objects)
+
+            # TODO in pypokerengine card_utils.py they did this my taking the max
+            # It might make sense because we have to assume the opponent plays optimaly
+            wons.append(1 if own_hand_value >= opponent_hand_value else 0)
 
     rewards = []
     for won in wons:
@@ -154,13 +158,19 @@ def find_possible_actions(state,players):
             legal_actions.append({'action':'raise','amount':amount})
     return legal_actions
 
-def simulate_actions(state,actions):
+def simulate_actions(state,actions,players):
     # Simulates where the game might go depending what action
     # player takes. Own cards can be used in the end to
     # predict reward but every opponent card option need to be
     # tested.
-    # FIXME: simulate actions
     next_states = []
     for action in actions:
-        print("do action")
+        # e.g. action = {'action': 'fold', 'amount': 0}
+        action_name = action['action']
+        action_amount = action['amount']
+        # FIXME add players parameter to this function and also modify the first line
+        # to not require have a table in state.
+        # __accept__action might also work. Understand what's more in __update_st...
+        RoundManager.__update_state_by_action(state,action,action_amount)
+        next_states.append((state,players))
     return next_states

@@ -1,4 +1,4 @@
-## brain.py
+## algorithms.py
 This contains different algorithms you can use to play poker.
 
 ### Class MCTS
@@ -7,7 +7,7 @@ https://gist.github.com/kjlubick/8ea239ede6a026a61f4d
 https://ieeexplore.ieee.org/abstract/document/6203567
 
 ## player.py
-Layer between PyPokerEngine API and brain.py. This is needed because PyPokerEngine will give pretty raw data that we need to formated the right way for the algorithms.
+Layer between PyPokerEngine API and algorithms.py. This is needed because PyPokerEngine will give pretty raw data that we need to formated the right way for the algorithms.
 
 
 ## game_state.py

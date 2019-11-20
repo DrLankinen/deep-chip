@@ -1,4 +1,4 @@
-from src import brain
+from src import algorithms
 import unittest
 
 class Tests(unittest.TestCase):
@@ -12,7 +12,7 @@ class Tests(unittest.TestCase):
         self._random_action_helper('raise',57,42)
 
     def _random_action_helper(self, target_action, target_amount, seed):
-        action, amount = brain.choose_random_action([
+        action, amount = algorithms.choose_random_action([
             {'action': 'fold', 'amount': 0},
             {'action': 'call', 'amount': 0},
             {'action': 'raise', 'amount': {'max':100,'min':50}}
