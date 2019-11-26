@@ -10,7 +10,7 @@ Texas Holdem bot
 ## Usage
 Go to the root folder of this project and run: 
 ```bash
-python -m src.brain
+python -m src.main
 ```
 
 ## Tests

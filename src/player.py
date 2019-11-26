@@ -8,7 +8,7 @@ class AlgorithmPlayer(BasePokerPlayer):
     def __init__(self, algorithm):
         self.algorithm = algorithm
 
-    def declare_action(self, valid_actions, hole_card, round_state):
+    def declare_action(self, valid_actions, hole_card, round_state, players):
         # This will be called everytime the player need to make an action.
         # We can see from history what happened after the last time
         # we made an action.
@@ -17,7 +17,6 @@ class AlgorithmPlayer(BasePokerPlayer):
         # hole_card = own cards
         # round_state = information about the game state
         state = state_handler.reformat_state(round_state,hole_card)
-        players = None
         action, amount = self.algorithm.play_turn(state,players,valid_actions)
         return action, amount
     
@@ -41,7 +40,7 @@ class FishPlayer(BasePokerPlayer):
     def __init__(self, action_name="call"):
         self.action_name = action_name
 
-    def declare_action(self, valid_actions, hole_card, round_state):
+    def declare_action(self, valid_actions, hole_card, round_state, players):
         for i in range(len(valid_actions)):
             if valid_actions[i]['action'] == self.action_name:
                 return valid_actions[i]['action'], valid_actions[i]['amount']

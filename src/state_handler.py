@@ -31,6 +31,8 @@ def is_terminal(state,reward=False):
     # Check is terminal state and if reward=True return reward
 
     # Check if either of the players have folded
+    print("state[action_histories]:",state["action_histories"])
+    print("len(state[action_histories]-1):",state["action_histories"])
     latest_round = state["action_histories"][len(state["action_histories"]-1)]
     for action in latest_round:
         if action["action"] == "FOLD" and reward: return True, final_reward(state)
@@ -152,7 +154,7 @@ def find_possible_actions(state,players):
         min = int(item['amount']['min'])
         max = int(item['amount']['max'])
         # Remove this action
-        legal_actions = legal_actions[:i-1] + legal_actions[i:]
+        legal_actions = legal_actions[:i] + legal_actions[i+1:]
         # Add all different amounts seperately
         for amount in range(min,max+1):
             legal_actions.append({'action':'raise','amount':amount})
@@ -164,13 +166,32 @@ def simulate_actions(state,actions,players):
     # predict reward but every opponent card option need to be
     # tested.
     next_states = []
+    print("actions:",actions)
     for action in actions:
         # e.g. action = {'action': 'fold', 'amount': 0}
         action_name = action['action']
         action_amount = action['amount']
-        # FIXME add players parameter to this function and also modify the first line
-        # to not require have a table in state.
         # __accept__action might also work. Understand what's more in __update_st...
-        RoundManager.__update_state_by_action(state,action,action_amount)
+        print("-"*50)
+        print("action_name:",action_name)
+        print("action_amount:",action_amount)
+        print("-"*50)
+        RoundManager._RoundManager__update_state_by_action(state,action_name,action_amount,players)
         next_states.append((state,players))
     return next_states
+
+def get_methods(object, spacing=20): 
+  methodList = [] 
+  for method_name in dir(object): 
+    try: 
+        if callable(getattr(object, method_name)): 
+            methodList.append(str(method_name)) 
+    except: 
+        methodList.append(str(method_name)) 
+  processFunc = (lambda s: ' '.join(s.split())) or (lambda s: s) 
+  for method in methodList: 
+    try: 
+        print(str(method.ljust(spacing)) + ' ' + 
+              processFunc(str(getattr(object, method).__doc__)[0:90])) 
+    except: 
+        print(method.ljust(spacing) + ' ' + ' getattr() failed') 
