@@ -10,14 +10,14 @@ def reformat_state(state,hole_card):
     # format this code is supporing
     # TODO: Try remove some information to make the state space smaller
     state['hole_card'] = hole_card
-    # str because need to be used as a key
-    # can be changed back to dictonary with eval()
-    return str(state)
+    return state
 
 def find_children(state,players):
     # Find all possible states from gives state
-    state = eval(state)
+    # if type(state) == str: state = eval(state)
     children = []
+    print("state:",state)
+    print("type(state):",type(state))
     own_possible_actions = find_possible_actions(state,players)
     future_info = simulate_actions(state,own_possible_actions,players)
     for future_state, future_players in future_info:
@@ -25,27 +25,30 @@ def find_children(state,players):
         simulated_next_states = simulate_actions(state,opponent_possible_actions,players)
         for next_state in simulated_next_states:
             if next_state not in children: children.append(next_state)
+    print("/"*75)
+    print("children:",children)
+    print("/"*75)
     return children
 
 def is_terminal(state,reward=False):
     # Check is terminal state and if reward=True return reward
+    if "action_histories" not in state and reward: return False, 0
+    if "action_histories" not in state: return False
 
     # Check if either of the players have folded
-    print("state[action_histories]:",state["action_histories"])
-    print("len(state[action_histories]-1):",state["action_histories"])
-    latest_round = state["action_histories"][len(state["action_histories"]-1)]
+    action_histories = state["action_histories"]
+    latest_round = action_histories[list(action_histories.keys())[len(action_histories)-1]]
     for action in latest_round:
         if action["action"] == "FOLD" and reward: return True, final_reward(state)
         if action["action"] == "FOLD" and not reward: return True
 
     # Check is round_count 3
-    state = eval(state)
     if state["round_count"] != 3 and reward: return False, 0
     if state["round_count"] != 3 and not reward: return False
 
     # If two check and/or call actions in row
     # it's a terminal state
-    actions = state["action_histories"]["river"]
+    actions = action_histories["river"]
     cc_counter = 0
     for action in reversed(actions):
         if action["action"] == "CALL": cc_counter += 1
@@ -61,16 +64,16 @@ def is_terminal(state,reward=False):
 
 def _decode_card(card):
     f, s = 0, 0
-    if card_one[0] == "C": f = 2
-    elif card_one[0] == "D": f = 4
-    elif card_one[0] == "H": f = 8
-    elif card_one[0] == "S": f = 16
+    if card[0] == "C": f = 2
+    elif card[0] == "D": f = 4
+    elif card[0] == "H": f = 8
+    elif card[0] == "S": f = 16
 
-    if card_one[1] == "T": s = 10
-    elif card_one[1] == "J": s = 11
-    elif card_one[1] == "Q": s = 12
-    elif card_one[1] == "K": s = 13
-    elif card_one[1] == "A": s = 14
+    if card[1] == "T": s = 10
+    elif card[1] == "J": s = 11
+    elif card[1] == "Q": s = 12
+    elif card[1] == "K": s = 13
+    elif card[1] == "A": s = 14
 
 def final_reward(state):
     # Parse reward from state and return

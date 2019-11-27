@@ -21,22 +21,23 @@ class MCTS:
 
     def _pick_action(self, state, valid_actions):
         # If first time in this state choose random child
-        if state not in self.children:
+        if str(state) not in self.children:
             return choose_random_action(valid_actions)
         
         def value(state):
             # Avoid choosing unvisited nodes
-            if self.N[state] == 0: return float("-inf")
+            if self.N[str(state)] == 0: return float("-inf")
             # Average reward
-            return self.Q[state] / self.N[state]
+            return self.Q[str(state)] / self.N[str(state)]
         
-        return max(self.children[state], key=value)
+        return max(self.children[str(state)], key=value)
 
     def _rollout(self, state, players):
         # Calculate one layer
         # A list of states that leads to unexplored or terminal state
         path = self._select(state)
         leaf = path[-1]
+        if type(leaf) == str: leaf = eval(leaf)
         # Find all children states
         self._expand(leaf,players)
         reward = self._simulate(leaf,players)
@@ -47,12 +48,12 @@ class MCTS:
         path = []
         # Continue until finds unexplored or terminal state
         while True:
-            path.append(state)
-            if state not in self.children or not self.children[state]:
+            path.append(str(state))
+            if str(state) not in self.children or not self.children[str(state)]:
                 # Unexplored or terminal
                 return path
             # Checks what states we haven't explored yet
-            unexplored = self.children[state] - self.children.keys()
+            unexplored = self.children[str(state)] - self.children.keys()
             # If there is unexplored states
             if unexplored:
                 # Pop the first
@@ -64,8 +65,8 @@ class MCTS:
     
     def _expand(self, state, players):
         # Find all children states
-        if state in self.children: return
-        self.children[state] = state_handler.find_children(state,players)
+        if str(state) in self.children: return
+        self.children[str(state)] = state_handler.find_children(state,players)
     
     def _simulate(self, state, players):
         # Go to random child state until terminal
@@ -78,17 +79,17 @@ class MCTS:
     def _backpropagate(self, path, reward):
         # Send reward to above state
         for state in reversed(path):
-            self.N[state] += 1
-            self.Q[state] += reward
+            self.N[str(state)] += 1
+            self.Q[str(state)] += reward
     
     def _ucb1_select(self, state):
         # http://www.jmlr.org/papers/volume3/auer02a/auer02a.pdf
         # This helps to balance between exploration and exploitation
         def ucb1(n):
             exploitation = self.Q[n]/self.N[n]
-            exploration = self.epsilon*math.sqrt(math.log(self.N[state])/self.N[n]) 
+            exploration = self.epsilon*math.sqrt(math.log(self.N[str(state)])/self.N[n]) 
             return exploitation + exploration
-        return max(self.children[state], key=ucb1)
+        return max(self.children[str(state)], key=ucb1)
 
 
 def choose_random_action(valid_actions,seed=None):
