@@ -20,6 +20,7 @@ def find_children(state,players):
     print("type(state):",type(state))
     own_possible_actions = find_possible_actions(state,players)
     future_info = simulate_actions(state,own_possible_actions,players)
+    print("&"*500)
     for future_state, future_players in future_info:
         opponent_possible_actions = find_possible_actions(future_state,future_players)
         simulated_next_states = simulate_actions(state,opponent_possible_actions,players)
@@ -149,7 +150,17 @@ def find_random_child(state,players):
 
 def find_possible_actions(state,players):
     # Fold, call (0 = check), raise (min-max)
+    print("state123321:",state)
+    print("players123321:",players)
+    for p in players:
+        print("%/*"*5)
+        print("action_histories:",p.action_histories[-5:])
+    print("##############")
+    print("players:",players)
+    print("state[next_player]:",state["next_player"])
+    print("state[small_blind]:",state["small_blind_amount"])
     legal_actions = ActionChecker.legal_actions(players,state['next_player'],state['small_blind_amount'])
+    print("legal_actions:",legal_actions)
     # Split raise
     for i in range(len(legal_actions)):
         item = legal_actions[i]
