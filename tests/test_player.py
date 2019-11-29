@@ -1,4 +1,4 @@
-from scripts import player
+from src import player
 import unittest
 
 
