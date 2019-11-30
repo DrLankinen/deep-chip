@@ -67,14 +67,24 @@ class MCTS:
         # Find all children states
         if str(state) in self.children: return
         self.children[str(state)] = state_handler.find_children(state,players)
-    
+
     def _simulate(self, state, players):
         # Go to random child state until terminal
+        i = 0
         while True:
             if state_handler.is_terminal(state):
                 reward = state_handler.final_reward(state)
                 return reward
-            state = state_handler.find_random_child(state,players)
+            print("()()()()"*80)
+            print("state8947:",state)
+            print()
+            print("players:",players)
+            print()
+            print()
+            state, players = state_handler.find_random_child(state,players)
+            print("state4561:",state)
+            print(("("+str(i)+")("+str(i)+")("+str(i)+")("+str(i)+")")*80)
+            i += 1
     
     def _backpropagate(self, path, reward):
         # Send reward to above state

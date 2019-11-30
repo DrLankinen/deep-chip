@@ -24,9 +24,10 @@ def find_children(state,players):
     for future_state, future_players in future_info:
         opponent_possible_actions = find_possible_actions(future_state,future_players)
         simulated_next_states = simulate_actions(state,opponent_possible_actions,players)
-        for next_state in simulated_next_states:
-            if next_state not in children: children.append(next_state)
+        for next_state_and_players in simulated_next_states:
+            if next_state_and_players[0] not in children: children.append(next_state_and_players)
     print("/"*75)
+    print("type(state)333:",type(state))
     print("children:",children)
     print("/"*75)
     return children
@@ -169,6 +170,7 @@ def find_possible_actions(state,players):
         max = int(item['amount']['max'])
         # Remove this action
         legal_actions = legal_actions[:i] + legal_actions[i+1:]
+        if min == -1 or max == -1: continue
         # Add all different amounts seperately
         for amount in range(min,max+1):
             legal_actions.append({'action':'raise','amount':amount})
@@ -190,7 +192,11 @@ def simulate_actions(state,actions,players):
         print("action_name:",action_name)
         print("action_amount:",action_amount)
         print("-"*50)
+        print("state7877:",state)
+        print()
         RoundManager._RoundManager__update_state_by_action(state,action_name,action_amount,players)
+        print("state555:",state)
+        print()
         next_states.append((state,players))
     return next_states
 
