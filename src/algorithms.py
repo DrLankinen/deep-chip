@@ -10,7 +10,7 @@ class MCTS:
         self.N = dict() # num of visits for each state
         self.children = dict() # children of each state
 
-    def play_turn(self, state, players, valid_actions, num_of_rollouts=100):
+    def play_turn(self, state, players, valid_actions, num_of_rollouts=5):
         # Do n rollouts before making the action
         # more rollouts means better actions but
         # it takes more time
@@ -40,7 +40,9 @@ class MCTS:
         if type(leaf) == str: leaf = eval(leaf)
         # Find all children states
         self._expand(leaf,players)
+        print("pre simulate")
         reward = self._simulate(leaf,players)
+        print("after simulate")
         self._backpropagate(path, reward)
 
     # Takes random path from gives state to unexplored or terminal state
@@ -70,21 +72,11 @@ class MCTS:
 
     def _simulate(self, state, players):
         # Go to random child state until terminal
-        i = 0
         while True:
             if state_handler.is_terminal(state):
                 reward = state_handler.final_reward(state)
                 return reward
-            print("()()()()"*80)
-            print("state8947:",state)
-            print()
-            print("players:",players)
-            print()
-            print()
             state, players = state_handler.find_random_child(state,players)
-            print("state4561:",state)
-            print(("("+str(i)+")("+str(i)+")("+str(i)+")("+str(i)+")")*80)
-            i += 1
     
     def _backpropagate(self, path, reward):
         # Send reward to above state

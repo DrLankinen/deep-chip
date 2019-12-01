@@ -16,37 +16,48 @@ def find_children(state,players):
     # Find all possible states from gives state
     # if type(state) == str: state = eval(state)
     children = []
-    print("state:",state)
-    print("type(state):",type(state))
     own_possible_actions = find_possible_actions(state,players)
+    print()
+    print()
+    for n in own_possible_actions:
+        print(n)
+        print()
+    print()
+    print()
     future_info = simulate_actions(state,own_possible_actions,players)
-    print("&"*500)
+    print()
+    print()
+    for n in future_info:
+        print(n)
+        print()
+    print()
+    print()
+    exit()
     for future_state, future_players in future_info:
         opponent_possible_actions = find_possible_actions(future_state,future_players)
         simulated_next_states = simulate_actions(state,opponent_possible_actions,players)
         for next_state_and_players in simulated_next_states:
             if next_state_and_players[0] not in children: children.append(next_state_and_players)
-    print("/"*75)
-    print("type(state)333:",type(state))
-    print("children:",children)
-    print("/"*75)
     return children
 
 def is_terminal(state,reward=False):
     # Check is terminal state and if reward=True return reward
     if "action_histories" not in state and reward: return False, 0
     if "action_histories" not in state: return False
-
+    
     # Check if either of the players have folded
     action_histories = state["action_histories"]
     latest_round = action_histories[list(action_histories.keys())[len(action_histories)-1]]
+    
     for action in latest_round:
         if action["action"] == "FOLD" and reward: return True, final_reward(state)
         if action["action"] == "FOLD" and not reward: return True
 
+    print("pre round_count")
     # Check is round_count 3
     if state["round_count"] != 3 and reward: return False, 0
     if state["round_count"] != 3 and not reward: return False
+    print("after round_count")
 
     # If two check and/or call actions in row
     # it's a terminal state
@@ -60,6 +71,7 @@ def is_terminal(state,reward=False):
         elif cc_counter >= 2 and not reward: 
             return True
 
+    print("6")
     # Return reward if wanted
     if reward: return True, final_reward(state)
     return True
@@ -147,22 +159,14 @@ def find_random_child(state,players):
     # Find one random state from given state
     
     # TODO: Is it possible to get random child without calculating all of them?
-    return random.choice(find_children(state,players))
+    children = find_children(state,players)
+    return random.choice(children)
 
 def find_possible_actions(state,players):
     # Fold, call (0 = check), raise (min-max)
-    print("state123321:",state)
-    print("players123321:",players)
-    for p in players:
-        print("%/*"*5)
-        print("action_histories:",p.action_histories[-5:])
-    print("##############")
-    print("players:",players)
-    print("state[next_player]:",state["next_player"])
-    print("state[small_blind]:",state["small_blind_amount"])
     legal_actions = ActionChecker.legal_actions(players,state['next_player'],state['small_blind_amount'])
-    print("legal_actions:",legal_actions)
     # Split raise
+    print("legal_actions:",legal_actions)
     for i in range(len(legal_actions)):
         item = legal_actions[i]
         if not isinstance(item['amount'],dict): continue
@@ -182,36 +186,23 @@ def simulate_actions(state,actions,players):
     # predict reward but every opponent card option need to be
     # tested.
     next_states = []
-    print("actions:",actions)
     for action in actions:
         # e.g. action = {'action': 'fold', 'amount': 0}
         action_name = action['action']
         action_amount = action['amount']
         # __accept__action might also work. Understand what's more in __update_st...
-        print("-"*50)
-        print("action_name:",action_name)
-        print("action_amount:",action_amount)
-        print("-"*50)
-        print("state7877:",state)
         print()
-        RoundManager._RoundManager__update_state_by_action(state,action_name,action_amount,players)
-        print("state555:",state)
+        print("old state:")
+        print(state)
+        print("old player:",players[state["next_player"]])
         print()
+        # FIXME THIS DOESN'T UPDATE STATE OR PLAYERS!!!
+        state, players = RoundManager._RoundManager__update_state_by_action(state,action_name,action_amount,players,True)
+        print()
+        print("new state:")
+        print(state)
+        print("new player:",players[state["next_player"]])
+        print()
+        exit()
         next_states.append((state,players))
     return next_states
-
-def get_methods(object, spacing=20): 
-  methodList = [] 
-  for method_name in dir(object): 
-    try: 
-        if callable(getattr(object, method_name)): 
-            methodList.append(str(method_name)) 
-    except: 
-        methodList.append(str(method_name)) 
-  processFunc = (lambda s: ' '.join(s.split())) or (lambda s: s) 
-  for method in methodList: 
-    try: 
-        print(str(method.ljust(spacing)) + ' ' + 
-              processFunc(str(getattr(object, method).__doc__)[0:90])) 
-    except: 
-        print(method.ljust(spacing) + ' ' + ' getattr() failed') 
