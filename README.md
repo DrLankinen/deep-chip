@@ -7,6 +7,15 @@ Texas Holdem bot
 ## Weekly updates
 [1. week](https://github.com/RealLankinen/deep-chip/blob/master/documentation/weekly-progress-1.md) | [2. week](https://github.com/RealLankinen/deep-chip/blob/master/documentation/weekly-progress-2.md) | [3. week](https://github.com/RealLankinen/deep-chip/blob/master/documentation/weekly-progress-3.md) | [4. week](https://github.com/RealLankinen/deep-chip/blob/master/documentation/weekly-progress-4.md) | [5. week](https://github.com/RealLankinen/deep-chip/blob/master/documentation/weekly-progress-5.md)
 
+## Installation
+```
+git clone https://github.com/RealLankinen/deep-chip.git
+```
+In this project I needed to modify PyPokerEngine which this is using a lot and that is why you also need to install it differently than normally.
+```
+pip install git+https://github.com/RealLankinen/PyPokerEngine.git
+```
+
 ## Usage
 Go to the root folder of this project and run: 
 ```bash
