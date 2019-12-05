@@ -1,0 +1,5 @@
+This week I added some important things for the presentation the next week. I didn't get the algorithm work but I try to make simple player to just show how it should work. After presentation I will spend some time trying to fix everything but right now it looks really hard.
+
+I'm still stuck with the simulation part of the algorithm. That's the biggest problem and something I tried to solve further without success. I probably made some progress (or at least made modifications) but I have no idea how far I'm from the working program.
+
+The problem I have been stuck for some time is that it's really hard to do simulation part of the algorithm for Texas Holdem poker. In tic-tac-toe it's easy to just fill all possible places but for Texas Holdem poker it is needed to consider all different cards, actions, and possible next cards for own player and opponent.
