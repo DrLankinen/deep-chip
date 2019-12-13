@@ -1,6 +1,6 @@
 import math
 import random
-from src import state_handler
+from pypokerengine.utils import card_utils
 
 class MCTS:
     def __init__(self,epsilon):
@@ -38,11 +38,8 @@ class MCTS:
         path = self._select(state)
         leaf = path[-1]
         if type(leaf) == str: leaf = eval(leaf)
-        # Find all children states
-        self._expand(leaf,players)
-        print("pre simulate")
-        reward = self._simulate(leaf,players)
-        print("after simulate")
+        # FIXME: What's nb_simulation?
+        reward = card_utils.estimate_hole_card_win_rate(nb_simulation,2,state['community_card'],state['hole_card'])
         self._backpropagate(path, reward)
 
     # Takes random path from gives state to unexplored or terminal state
@@ -64,19 +61,6 @@ class MCTS:
                 return path
             # Select children state using uct
             state = self._ucb1_select(state)
-    
-    def _expand(self, state, players):
-        # Find all children states
-        if str(state) in self.children: return
-        self.children[str(state)] = state_handler.find_children(state,players)
-
-    def _simulate(self, state, players):
-        # Go to random child state until terminal
-        while True:
-            if state_handler.is_terminal(state):
-                reward = state_handler.final_reward(state)
-                return reward
-            state, players = state_handler.find_random_child(state,players)
     
     def _backpropagate(self, path, reward):
         # Send reward to above state
