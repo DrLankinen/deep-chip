@@ -1,6 +1,7 @@
 import math
 import random
 from pypokerengine.utils import card_utils
+from pypokerengine.engine import card
 
 class MCTS:
     def __init__(self,epsilon):
@@ -10,13 +11,10 @@ class MCTS:
         self.N = dict() # num of visits for each state
         self.children = dict() # children of each state
 
-    def play_turn(self, state, players, valid_actions, num_of_rollouts=5):
-        # Do n rollouts before making the action
-        # more rollouts means better actions but
-        # it takes more time
+    def play_turn(self, state, valid_actions, num_of_rollouts=5):
         for _ in range(num_of_rollouts):
-            self._rollout(state, players)
-        # Pick action
+            self._rollout(state)
+        
         return self._pick_action(state, valid_actions)
 
     def _pick_action(self, state, valid_actions):
@@ -32,14 +30,17 @@ class MCTS:
         
         return max(self.children[str(state)], key=value)
 
-    def _rollout(self, state, players):
+    def _rollout(self, state):
         # Calculate one layer
         # A list of states that leads to unexplored or terminal state
         path = self._select(state)
         leaf = path[-1]
         if type(leaf) == str: leaf = eval(leaf)
-        # FIXME: What's nb_simulation?
-        reward = card_utils.estimate_hole_card_win_rate(nb_simulation,2,state['community_card'],state['hole_card'])
+
+        hole_cards, community_cards = self._change_card_format(leaf)
+        # FIXME: What's nb_simulation (the first parameter)?
+        reward = card_utils.estimate_hole_card_win_rate(1,2,hole_cards,community_cards)
+
         self._backpropagate(path, reward)
 
     # Takes random path from gives state to unexplored or terminal state
@@ -61,11 +62,24 @@ class MCTS:
                 return path
             # Select children state using uct
             state = self._ucb1_select(state)
+
+    def _change_card_format(self, leaf):
+        hole_cards = leaf['hole_card']
+        for i, c in enumerate(hole_cards):
+            hole_cards[i] = card.Card(REVERSE_SUIT_MAP[c[0]],REVERSE_RANK_MAP[c[1]])
+        
+        community_cards = leaf['community_card']
+        for i, c in enumerate(community_cards):
+            community_cards[i] = card.Card(REVERSE_SUIT_MAP[c[0]],REVERSE_RANK_MAP[c[1]])
+        
+        return hole_cards, community_cards
     
     def _backpropagate(self, path, reward):
         # Send reward to above state
         for state in reversed(path):
+            if str(state) not in self.N: self.N[str(state)] = 0
             self.N[str(state)] += 1
+            if str(state) not in self.Q: self.Q[str(state)] = 0
             self.Q[str(state)] += reward
     
     def _ucb1_select(self, state):
@@ -84,3 +98,27 @@ def choose_random_action(valid_actions,seed=None):
     action, amount = random_action['action'], random_action['amount']
     if action == "raise": amount = random.randint(amount['min'],amount['max'])
     return action, amount
+
+
+REVERSE_RANK_MAP = {
+    '2' : 2,
+    '3' : 3,
+    '4' : 4,
+    '5' : 5,
+    '6' : 6,
+    '7' : 7,
+    '8' : 8,
+    '9' : 9,
+    'T' : 10,
+    'J' : 11,
+    'Q' : 12,
+    'K' : 13,
+    'A' : 14
+}
+
+REVERSE_SUIT_MAP = {
+    'C' : 2,
+    'D' : 4,
+    'H' : 8,
+    'S' : 16
+}
