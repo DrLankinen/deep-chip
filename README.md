@@ -11,10 +11,6 @@ Texas Holdem bot
 ```
 git clone https://github.com/RealLankinen/deep-chip.git
 ```
-In this project I needed to modify PyPokerEngine which this is using a lot and that is why you also need to install it differently than normally.
-```
-pip install git+https://github.com/RealLankinen/PyPokerEngine.git
-```
 
 ## Usage
 Go to the root folder of this project and run: 
