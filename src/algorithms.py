@@ -2,14 +2,21 @@ import math
 import random
 from pypokerengine.utils import card_utils
 from pypokerengine.engine import card
+import pickle
+import os
 
 class MCTS:
-    def __init__(self,epsilon):
+    def __init__(self,epsilon,load=None):
         # initialize everything
         self.epsilon = epsilon # amount of exploration
         self.Q = dict() # total reward of each state
         self.N = dict() # num of visits for each state
         self.children = dict() # children of each state
+        if load:
+            if load == True: path = "./saved/"
+            else: path = load
+            if not os.path.exists(path): return
+            self.Q,self.N,self.children = pickle.load(open(path+"data.pkl","rb"))
 
     def play_turn(self, state, valid_actions, num_of_rollouts=5):
         for _ in range(num_of_rollouts):
@@ -38,7 +45,6 @@ class MCTS:
         if type(leaf) == str: leaf = eval(leaf)
 
         hole_cards, community_cards = self._change_card_format(leaf)
-        # FIXME: What's nb_simulation (the first parameter)?
         reward = card_utils.estimate_hole_card_win_rate(1,2,hole_cards,community_cards)
 
         self._backpropagate(path, reward)
@@ -90,6 +96,11 @@ class MCTS:
             exploration = self.epsilon*math.sqrt(math.log(self.N[str(state)])/self.N[n]) 
             return exploitation + exploration
         return max(self.children[str(state)], key=ucb1)
+    
+    def save(self, path=None):
+        if path is None: path = "./saved/"
+        if not os.path.exists(path): os.makedirs(path)
+        pickle.dump([self.Q,self.N,self.children],open(path+"data.pkl","wb"))
 
 
 def choose_random_action(valid_actions,seed=None):

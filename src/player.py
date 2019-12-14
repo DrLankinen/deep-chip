@@ -9,15 +9,8 @@ class AlgorithmPlayer(BasePokerPlayer):
         self.algorithm = algorithm
 
     def declare_action(self, valid_actions, hole_card, round_state):
-        # This will be called everytime the player need to make an action.
-        # We can see from history what happened after the last time
-        # we made an action.
-        
-        # valid_actions = possible actions in this state
-        # hole_card = own cards
-        # round_state = information about the game state
         state = state_handler.reformat_state(round_state,hole_card)
-        action, amount = self.algorithm.play_turn(state,valid_actions)
+        action, amount = self.algorithm.play_turn(state,valid_actions,500)
         return action, amount
     
     def receive_game_start_message(self, game_info):
@@ -33,6 +26,7 @@ class AlgorithmPlayer(BasePokerPlayer):
         pass
 
     def receive_round_result_message(self, winners, hand_info, round_state):
+        self.algorithm.save()
         pass
 
 class FishPlayer(BasePokerPlayer):

@@ -8,8 +8,6 @@ from pypokerengine.utils import action_utils
 import random
 
 def reformat_state(state,hole_card):
-    # Changes state got from PyPokerEngine to
-    # format this code is supporing
     # TODO: Try remove some information to make the state space smaller
     state['hole_card'] = hole_card
     return state
